@@ -5,7 +5,8 @@ Co potrzeba do odpalenia?
 	
 	-MongoDb 3.0.1
 	-VirtualBox SDK // w folderze Vboxa jest folder "/sdk/install", wbijacie do niego i uruchamiacie skrypt 'vboxapisetup.py' (pamiêtaæ o ustawieniu sciezki instalacji, tak jak w linku na fb, który pablo wrzuci³)
-	
+	- 64 bitowy pywin32	
+
 Jak wszystko poinstalowane, to:
 	-odpaliæ server MongoDb (w konsoli wpisaæ: mongod)
 	-w osobnej konsoli odpaliæ aplikacje (zvb.py)
