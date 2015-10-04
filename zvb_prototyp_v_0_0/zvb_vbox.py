@@ -9,7 +9,6 @@ def find_vms():
 	return vms 
 
 def start_vm(vmname):
-	
 	vbox = mgr.vbox
 	mach = vbox.findMachine(vmname)
 	session = mgr.getSessionObject(vbox)
@@ -18,10 +17,21 @@ def start_vm(vmname):
 	mgr.closeMachineSession(session)
 
 def delete_vm(vmname):
-	pass
+	vbox = mgr.vbox
+	machine = vbox.findMachine(vmname)
+	machine.unregister(4)
+	machine.deleteConfig([])
+	return True
 
-def create_vm(vmname, otherparams):
-	pass
+def create_vm(vmname, vmtype):
+	vbox = mgr.vbox
+	machine = vbox.createMachine("", vmname, [], vmtype, [])
+	machine.savesettings()
+	vbox.registerMachine(machine)
+	return True
 
-mgr = VirtualBoxManager(None, None)
+def find_known_hosts():
+	known_hosts = []
+	return known_hosts
 	
+mgr = VirtualBoxManager(None, None)

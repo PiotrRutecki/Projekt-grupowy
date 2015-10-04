@@ -30,12 +30,21 @@ class ZvbDAO:
 		for name in cursor:
 			vms_on_host.append(name['vms_names'])
 		
-		
 		return vms_on_host
 		
-	def create_vm(self):
-		pass
+	def create_vm(self, hostname, vmname):
+		try:
+			self.zvb.update({'host':hostname},{'$push':{'vms_names':vmname}})
+		except pymongo.errors.OperationFailure:
+			print "oops, mongo error"
+			return False
+		return True
 		
-	def remove_vm(self):
-		pass
+	def remove_vm(self, hostname, vmname):
+		try:
+			self.zvb.update({'host':hostname},{'$pull':{'vms_names':vmname}})
+		except pymongo.errors.OperationFailure:
+			print "oops, mongo error"
+			return False
+		return True
 		

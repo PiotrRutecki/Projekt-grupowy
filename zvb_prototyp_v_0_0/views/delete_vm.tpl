@@ -6,8 +6,10 @@
 <body>
 
 <h1>ZVB</h1>
-
-<p> Deleting not yet implemented! </p>
+<br>
+%if (vmname != None):
+Virtual machine: {{vmname}} was removed!
+%end
 
 <p> Go to <a href="/">Main page</a></p>
 
