@@ -54,6 +54,7 @@ Local host part =================================
 	%end	
 	<br>
 	<a href="/create_vm/">Create new VM: </a>
+	
 </p1>
 
 
@@ -63,7 +64,9 @@ Local host part =================================
 	<button id="show2">Show</button>
 	<br> <p2>Not yet implemented.</p2>
 </p>
-
+<form method="post">
+<input type="submit" value="refresh">
+</form>
 </body>
 </html>
 

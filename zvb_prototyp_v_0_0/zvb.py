@@ -9,7 +9,7 @@ __author__='artur'
 @bottle.route('/')
 def zvb_index():
 	hostname = "local"
-	known_hosts = zvb_vbox.find_known_hosts()
+	global known_hosts
 	local_vms = zvb.get_vms(hostname)
 	return bottle.template('zvb_template',dict(hostname=hostname,local_vms=local_vms, known_hosts=known_hosts))
 	
@@ -40,6 +40,13 @@ def process_create_vm():
 	zvb.create_vm(hostname, vmname)
 	bottle.redirect("/")
 	
+@bottle.post('/')
+def refresh_known_hosts():
+	global known_hosts
+	known_hosts = zvb_vbox.find_known_hosts()
+	bottle.redirect('/')
+	
+	
 		
 connection_string = "mongodb://localhost"
 connection = pymongo.MongoClient(connection_string)
@@ -50,6 +57,8 @@ zvb.drop_database()
 
 local_vms = zvb_vbox.find_vms()
 zvb.insert_vms(local_vms)
+
+known_hosts = zvb_vbox.find_known_hosts()
 
 bottle.debug(True)
 bottle.run(host='localhost', port=8082)
