@@ -1,4 +1,4 @@
-from vboxapi import VirtualBoxManager
+#from vboxapi import VirtualBoxManager
 import subprocess
 import config
 
@@ -42,4 +42,7 @@ def find_known_hosts():
 			known_hosts.append(temp[-1])
 	return known_hosts
 	
-mgr = VirtualBoxManager(None, None)
+	#to do
+def telnetcostam(host, komenda):
+	pass
+#mgr = VirtualBoxManager(None, None)

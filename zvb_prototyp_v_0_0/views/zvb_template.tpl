@@ -59,10 +59,15 @@ Local host part =================================
 
 
 <p>
+<!-- to do -->
 	Known hosts part ===============================
 	<button id="hide2">Hide</button>
 	<button id="show2">Show</button>
-	<br> <p2>Not yet implemented.</p2>
+	<!-- <br> <p2>Not yet implemented.</p2> -->
+	<!--   -->
+	%for host in known_hosts:
+		<br> {{host}} <br>
+	%end
 </p>
 <form method="post">
 <input type="submit" value="refresh">
