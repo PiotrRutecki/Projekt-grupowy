@@ -3,16 +3,26 @@ import zvbDAO
 import zvb_vbox
 import bottle
 import cgi
+import os
+from socket import *
+import config
+
 
 __author__='artur'
 
 @bottle.route('/')
 def zvb_index():
-	hostname = "local"
 	global known_hosts
-	local_vms = zvb.get_vms(hostname)
-	remote_vms = zvb.get_remote_vms(known_hosts)
-	return bottle.template('zvb_template',dict(hostname=hostname,local_vms=local_vms, known_hosts=known_hosts, remote_vms=remote_vms))
+	local_vms = zvb.get_vms(config.ip_without_mask)
+	local_vbox_version = zvb.get_vbox_version(config.ip_without_mask)
+	remote_vms = {}
+	for host in known_hosts:
+		remote_vms[host] = zvb.get_vms(host)
+	return bottle.template('zvb_template',dict(hostname=config.ip_without_mask,
+												local_vms=local_vms, 
+												local_vbox_version=local_vbox_version,
+												known_hosts=known_hosts, 
+												remote_vms=remote_vms))
 	
 @bottle.route('/starting_vm/<vmname>')
 def start_vm(vmname):
@@ -46,11 +56,8 @@ def refresh_known_hosts():
 	global known_hosts
 	known_hosts = zvb_vbox.find_known_hosts()
 	bottle.redirect('/')
-	
-def find_remote_vms(known_hosts):
-	
-	
 		
+
 connection_string = "mongodb://localhost"
 connection = pymongo.MongoClient(connection_string)
 database = connection.zvb
@@ -59,11 +66,19 @@ zvb = zvbDAO.ZvbDAO(database)
 zvb.drop_database()
 
 local_vms = zvb_vbox.find_vms()
-zvb.insert_vms(local_vms)
+local_vbox_version = zvb_vbox.get_vbox_version()
+zvb.insert_vms(config.ip_without_mask, local_vbox_version, local_vms)
 
 known_hosts = zvb_vbox.find_known_hosts()
-remote_vms = zvb_vbox.find_remote_vms(known_hosts)
-zvb.insert_vms(remote_vms)
+print known_hosts
+for host in known_hosts:
+	if host != config.ip_without_mask:
+		try:
+			remote_vms = zvb_vbox.remote_command(host, "vboxmanage list vms")
+			remote_vbox_version = zvb_vbox.remote_command(host, "vboxmanage list vms")
+			zvb.insert_vms(host, remote_vbox_version, remote_vms)
+		except:
+			print "nie udalo sie polaczyc"
 
 bottle.debug(True)
 bottle.run(host='localhost', port=8082)

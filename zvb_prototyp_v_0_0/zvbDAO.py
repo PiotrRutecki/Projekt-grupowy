@@ -15,8 +15,8 @@ class ZvbDAO:
 			return False
 		return True
 		
-	def insert_vms(self, vms):
-		insertion = { "host": "local", "vms_names": vms}
+	def insert_vms(self, host, vboxversion, vms):
+		insertion = { "host": host, "vboxversion":vboxversion, "vms_names": vms}
 		try:
 			self.zvb.insert(insertion)
 		except pymongo.errors.OperationFailure:
@@ -31,6 +31,14 @@ class ZvbDAO:
 			vms_on_host.append(name['vms_names'])
 		
 		return vms_on_host
+		
+	def get_vbox_version(self, hostname):
+		vboxversion = ""
+		cursor = self.zvb.find({'host':hostname})
+		for name in cursor:
+			vboxversion = name['vboxversion']
+		
+		return vboxversion
 		
 	def create_vm(self, hostname, vmname):
 		try:
@@ -47,7 +55,3 @@ class ZvbDAO:
 			print "oops, mongo error"
 			return False
 		return True
-		
-	def get_remote_vms(known_hosts):
-		#z bazy scczytujemy hosty i ich vmki
-		pass

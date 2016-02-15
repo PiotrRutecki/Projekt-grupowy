@@ -1,6 +1,7 @@
 #from vboxapi import VirtualBoxManager
 import subprocess
 import config
+import re
 
 def find_vms():
 	tab = []
@@ -13,6 +14,11 @@ def find_vms():
 			out_tab.append(i.split('"')[1])
 	return out_tab
 
+def get_vbox_version():
+	proc = subprocess.Popen([config.vboxmanage_path, "--version"], stdout=subprocess.PIPE, shell=True)
+	(out, err) = proc.communicate()
+	return out
+	
 def start_vm(vmname):
 	subprocess.Popen([config.vboxmanage_path, "startvm", vmname], stdout=subprocess.PIPE, shell=True)
 	return True
@@ -34,13 +40,31 @@ def find_known_hosts():
 	temp = []
 	proc = subprocess.Popen(["nmap", "--open", "-sn", config.ip], stdout=subprocess.PIPE, shell=True)
 	(out, err) = proc.communicate()
-	tab = out.split('\n')
-	search_string = "Nmap scan report for"
-	for i in tab:
-		if search_string in i:
-			temp = i.split(" ")
-			known_hosts.append(temp[-1])
+	# tab = out.split('\n')
+	# search_string = "Nmap scan report for"
+	# for i in tab:
+		# if search_string in i:
+			# temp = i.split(" ")
+			# known_hosts.append(temp[-1])
+	known_hosts = re.findall('([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', out)
 	return known_hosts
 	
-def find_remote_vms():
-	pass
+def remote_command(host, command):
+	#wysylanie polecenia
+	host = host
+	port = 13000
+	addr = (host, port)
+	UDPSock = socket(AF_INET, SOCK_DGRAM)
+	UDPSock.sendto(command, addr)
+	UDPSock.close()
+
+	#odbieranie odpowiedzi
+	host = "localhost"
+	port = 13000
+	addr = (host, port)
+	buf = 1024
+	UDPSock = socket(AF_INET, SOCK_DGRAM)
+	UDPSock.bind(addr)
+	(data, addr) = UDPSock.recvfrom(buf)
+	UDPSock.close()
+	return data

@@ -33,6 +33,10 @@ Local host part =================================
 	%if (hostname != None):
 		Host: {{hostname}}
 	%end
+	<br>
+	%if (local_vbox_version != None):
+		VirtualBox version: {{local_vbox_version}}
+	%end
 
 	<br>
 	%if (local_vms != None):
