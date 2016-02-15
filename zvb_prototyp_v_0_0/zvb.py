@@ -11,7 +11,8 @@ def zvb_index():
 	hostname = "local"
 	global known_hosts
 	local_vms = zvb.get_vms(hostname)
-	return bottle.template('zvb_template',dict(hostname=hostname,local_vms=local_vms, known_hosts=known_hosts))
+	remote_vms = zvb.get_remote_vms(known_hosts)
+	return bottle.template('zvb_template',dict(hostname=hostname,local_vms=local_vms, known_hosts=known_hosts, remote_vms=remote_vms))
 	
 @bottle.route('/starting_vm/<vmname>')
 def start_vm(vmname):
@@ -46,6 +47,8 @@ def refresh_known_hosts():
 	known_hosts = zvb_vbox.find_known_hosts()
 	bottle.redirect('/')
 	
+def find_remote_vms(known_hosts):
+	
 	
 		
 connection_string = "mongodb://localhost"
@@ -59,6 +62,8 @@ local_vms = zvb_vbox.find_vms()
 zvb.insert_vms(local_vms)
 
 known_hosts = zvb_vbox.find_known_hosts()
+remote_vms = zvb_vbox.find_remote_vms(known_hosts)
+zvb.insert_vms(remote_vms)
 
 bottle.debug(True)
 bottle.run(host='localhost', port=8082)

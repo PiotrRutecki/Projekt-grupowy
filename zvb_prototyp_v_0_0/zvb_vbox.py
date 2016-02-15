@@ -42,7 +42,5 @@ def find_known_hosts():
 			known_hosts.append(temp[-1])
 	return known_hosts
 	
-	#to do
-def telnetcostam(host, komenda):
+def find_remote_vms():
 	pass
-#mgr = VirtualBoxManager(None, None)

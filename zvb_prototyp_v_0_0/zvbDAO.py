@@ -48,3 +48,6 @@ class ZvbDAO:
 			return False
 		return True
 		
+	def get_remote_vms(known_hosts):
+		#z bazy scczytujemy hosty i ich vmki
+		pass
