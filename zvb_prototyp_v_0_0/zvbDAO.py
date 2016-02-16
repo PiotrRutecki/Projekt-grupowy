@@ -30,7 +30,7 @@ class ZvbDAO:
 		for name in cursor:
 			vms_on_host.append(name['vms_names'])
 		
-		return vms_on_host
+		return vms_on_host			
 		
 	def get_vbox_version(self, hostname):
 		vboxversion = ""

@@ -52,7 +52,7 @@ def find_known_hosts():
 def remote_command(host, command):
 	#wysylanie polecenia
 	host = host
-	port = 13000
+	port = 8082
 	addr = (host, port)
 	UDPSock = socket(AF_INET, SOCK_DGRAM)
 	UDPSock.sendto(command, addr)
@@ -60,7 +60,7 @@ def remote_command(host, command):
 
 	#odbieranie odpowiedzi
 	host = "localhost"
-	port = 13000
+	port = 8082
 	addr = (host, port)
 	buf = 1024
 	UDPSock = socket(AF_INET, SOCK_DGRAM)

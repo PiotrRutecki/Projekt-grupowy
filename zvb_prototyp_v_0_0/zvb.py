@@ -6,7 +6,8 @@ import cgi
 import os
 from socket import *
 import config
-
+import subprocess
+import re
 
 __author__='artur'
 
@@ -16,26 +17,41 @@ def zvb_index():
 	local_vms = zvb.get_vms(config.ip_without_mask)
 	local_vbox_version = zvb.get_vbox_version(config.ip_without_mask)
 	remote_vms = {}
+	remote_vbox = {}
 	for host in known_hosts:
 		remote_vms[host] = zvb.get_vms(host)
+		remote_vbox[host] = zvb.get_vbox_version(host)
+	
 	return bottle.template('zvb_template',dict(hostname=config.ip_without_mask,
 												local_vms=local_vms, 
 												local_vbox_version=local_vbox_version,
 												known_hosts=known_hosts, 
-												remote_vms=remote_vms))
+												remote_vms=remote_vms,
+												remote_vbox=remote_vbox))
 	
-@bottle.route('/starting_vm/<vmname>')
-def start_vm(vmname):
+@bottle.route('/starting_vm/<host>/<vmname>')
+def start_vm(host, vmname):
 	vmname = cgi.escape(vmname)
-	zvb_vbox.start_vm(vmname)
+	host = cgi.escape(host)
+	if host == config.ip_without_mask: zvb_vbox.start_vm(vmname)
+	else:
+		proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote_bez_odpowiedzi.py", host, "vboxmanage startvm " + vmname], stdout=subprocess.PIPE, shell=True)
+		(out, err) = proc.communicate()
 	return bottle.template('starting_vm', dict(vmname=vmname))
 
-@bottle.route('/delete_vm/<vmname>')
-def delete_vm(vmname):
-	hostname = "local"
+@bottle.route('/delete_vm/<host>/<vmname>')
+def delete_vm(host, vmname):
+	#hostname = "local"
 	vmname = cgi.escape(vmname)
+	host = cgi.escape(host)
 	zvb_vbox.delete_vm(vmname)
-	zvb.remove_vm(hostname, vmname)
+	if host == config.ip_without_mask: 
+		zvb_vbox.delete_vm(vmname)
+		zvb.remove_vm(host, vmname)
+	else:
+		proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote_bez_odpowiedzi.py", host, "vboxmanage unregistervm " + vmname + " -delete"], stdout=subprocess.PIPE, shell=True)
+		(out, err) = proc.communicate()
+		zvb.remove_vm(host, vmname)
 	return bottle.template('delete_vm', dict(vmname=vmname))
 	
 @bottle.get('/create_vm/')
@@ -74,11 +90,35 @@ print known_hosts
 for host in known_hosts:
 	if host != config.ip_without_mask:
 		try:
-			remote_vms = zvb_vbox.remote_command(host, "vboxmanage list vms")
-			remote_vbox_version = zvb_vbox.remote_command(host, "vboxmanage list vms")
-			zvb.insert_vms(host, remote_vbox_version, remote_vms)
-		except:
-			print "nie udalo sie polaczyc"
+			proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote.py", host, "vboxmanage list vms"], stdout=subprocess.PIPE, shell=True)
+			(remote_vms_tmp, err) = proc.communicate()
+			print remote_vms_tmp
+			remote_vms_t = []
+			#remote_vms = re.findall('\"([a-zA-Z0-9_])\"',remote_vms_tmp)
+			remote_vms_t = remote_vms_tmp.split("\n")
+			print remote_vms_t
+			# print type(remote_vms)
+			# print remote_vms
+			# print remote_vms[0]
+			remote_vms_t.pop(0)
+			remote_vms_t.pop(-1)
+			remote_vms_t.pop(-1)
+			
+			print remote_vms_t
+			remote_vms = []
+			for i in remote_vms_t:
+				remote_vms.append(i.split('"')[1])
+			print remote_vms
+			proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote.py", host, "vboxmanage --version"], stdout=subprocess.PIPE, shell=True)
+			(remote_vbox_version_tmp, err) = proc.communicate()
+			remote_vbox_version = []
+			remote_vbox_version = remote_vbox_version_tmp.split("\n")
+			#remote_vbox_version_tmp.pop(0)
+			#remote_vbox_version_tmp.pop(-1)
+			#remote_vbox_version_tmp.pop(-1)
+			zvb.insert_vms(host, remote_vbox_version[1], remote_vms)
+		except IOError, error:
+			print error 
 
 bottle.debug(True)
 bottle.run(host='localhost', port=8082)

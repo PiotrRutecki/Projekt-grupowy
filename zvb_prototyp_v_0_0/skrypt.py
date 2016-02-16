@@ -1,13 +1,12 @@
-# Save as server.py 
 # Message Receiver
 import os
 from socket import *
 import subprocess
 
 def receiver():
-	host = "192.168.0.2"
+	host = "192.168.0.2" #set IP address of localhost
 	port = 13000
-	buf = 1024
+	buf = 1024000
 	addr = (host, port)
 	UDPSock = socket(AF_INET, SOCK_DGRAM)
 	UDPSock.bind(addr)
@@ -30,17 +29,12 @@ def receiver():
 	global flaga
 	flaga = 1
 
-# Save as client.py 
 # Message Sender
 def sender():
-	host = "192.168.0.3" # set to IP address of target computer
+	host = "192.168.0.3" # set to IP address of manage computer
 	port = 13000
 	addr = (host, port)
 	UDPSock = socket(AF_INET, SOCK_DGRAM)
-	# data = raw_input("Enter message to send or type 'exit': ")
-	# if data == "exit":
-		# global working
-		# working = False
 	print "wysylam: " + wynik
 	UDPSock.sendto(wynik, addr)
 	UDPSock.close()

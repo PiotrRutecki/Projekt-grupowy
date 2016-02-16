@@ -53,7 +53,7 @@ Local host part =================================
 	Wanna do sth?
 	%for vm in local_vms:
 		%for name in vm:
-			<br>{{name}}: <a href="/starting_vm/{{name}}">run</a>, <a href="/delete_vm/{{name}}">delete</a>
+			<br>{{name}}: <a href="/starting_vm/{{hostname}}/{{name}}">run</a>, <a href="/delete_vm/{{hostname}}/{{name}}">delete</a>
 		%end
 	%end	
 	<br>
@@ -69,8 +69,19 @@ Local host part =================================
 	<button id="show2">Show</button>
 	<!-- <br> <p2>Not yet implemented.</p2> -->
 	<!--   -->
-	%for host in known_hosts:
-		<br> {{host}} <br>
+	
+	%for key, value in remote_vms.iteritems():
+		%if (key != hostname):
+			<br> {{key}} 
+			<br> |__vboxversion: {{remote_vbox[key]}}
+			%for i in value:
+				%for name in i:
+					<br> |__nazwa maszyny: {{name}} <a href="/starting_vm/{{key}}/{{name}}">run</a>, <a href="/delete_vm/{{key}}/{{name}}">delete</a>
+				%end
+			%end
+			
+			
+		%end
 	%end
 </p>
 <form method="post">
