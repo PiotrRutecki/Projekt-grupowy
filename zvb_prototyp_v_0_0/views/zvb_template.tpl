@@ -57,19 +57,16 @@ Local host part =================================
 		%end
 	%end	
 	<br>
-	<a href="/create_vm/">Create new VM: </a>
+	<a href="/create_vm/{{hostname}}">Create new VM: </a>
 	
 </p1>
 
 
 <p>
-<!-- to do -->
 	Known hosts part ===============================
 	<button id="hide2">Hide</button>
 	<button id="show2">Show</button>
-	<!-- <br> <p2>Not yet implemented.</p2> -->
-	<!--   -->
-	
+	<p2>
 	%for key, value in remote_vms.iteritems():
 		%if (key != hostname):
 			<br> {{key}} 
@@ -78,11 +75,13 @@ Local host part =================================
 				%for name in i:
 					<br> |__nazwa maszyny: {{name}} <a href="/starting_vm/{{key}}/{{name}}">run</a>, <a href="/delete_vm/{{key}}/{{name}}">delete</a>
 				%end
+				<br> |__<a href="/create_vm/{{key}}">Create new VM: </a>
 			%end
 			
 			
 		%end
 	%end
+	</p2>
 </p>
 <form method="post">
 <input type="submit" value="refresh">

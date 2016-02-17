@@ -7,10 +7,14 @@
 
 <h1>ZVB</h1>
 <br>
-Create Virtual Machine:
+Create Virtual Machine on {{host}}:
 <form method="post">
       <table>
-	  
+		<tr>
+			<td>
+				
+			</td>
+		</tr>
         <tr>
           <td class="label">
             VM name:

@@ -35,7 +35,7 @@ def start_vm(host, vmname):
 	host = cgi.escape(host)
 	if host == config.ip_without_mask: zvb_vbox.start_vm(vmname)
 	else:
-		proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote_bez_odpowiedzi.py", host, "vboxmanage startvm " + vmname], stdout=subprocess.PIPE, shell=True)
+		proc = subprocess.Popen([config.zvb_path + "remote_bez_odpowiedzi.py", host, "vboxmanage startvm " + vmname], stdout=subprocess.PIPE, shell=True)
 		(out, err) = proc.communicate()
 	return bottle.template('starting_vm', dict(vmname=vmname))
 
@@ -49,22 +49,29 @@ def delete_vm(host, vmname):
 		zvb_vbox.delete_vm(vmname)
 		zvb.remove_vm(host, vmname)
 	else:
-		proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote_bez_odpowiedzi.py", host, "vboxmanage unregistervm " + vmname + " -delete"], stdout=subprocess.PIPE, shell=True)
+		proc = subprocess.Popen([config.zvb_path + "remote_bez_odpowiedzi.py", host, "vboxmanage unregistervm " + vmname + " -delete"], stdout=subprocess.PIPE, shell=True)
 		(out, err) = proc.communicate()
 		zvb.remove_vm(host, vmname)
 	return bottle.template('delete_vm', dict(vmname=vmname))
 	
-@bottle.get('/create_vm/')
-def create_vm():
-	return bottle.template('create_vm', dict(vmname="", vmtype=""))
+@bottle.get('/create_vm/<host>')
+def create_vm(host):
+	host = cgi.escape(host)
+	return bottle.template('create_vm', dict(vmname="", vmtype="", host=host))
 	
-@bottle.post('/create_vm/')
-def process_create_vm():
-	hostname = "local"
+@bottle.post('/create_vm/<host>')
+def process_create_vm(host):
+	#hostname = "local"
+	host = cgi.escape(host)
 	vmname = bottle.request.forms.get("vmname")
 	vmtype = bottle.request.forms.get("vmtype")
-	zvb_vbox.create_vm(vmname, vmtype)
-	zvb.create_vm(hostname, vmname)
+	if host == config.ip_without_mask:
+		zvb_vbox.create_vm(host, vmname, vmtype)
+	else:
+		proc = subprocess.Popen([config.zvb_path + "remote.py", host, "vboxmanage createvm --name " + vmname + " --ostype " + vmtype], stdout=subprocess.PIPE, shell=True)
+		(out, err) = proc.communicate()
+		if out: subprocess.Popen([config.zvb_path + "remote_bez_odpowiedzi.py", host, "vboxmanage registervm " + vmname], stdout=subprocess.PIPE, shell=True)
+	zvb.create_vm(host, vmname)
 	bottle.redirect("/")
 	
 @bottle.post('/')
@@ -90,16 +97,17 @@ print known_hosts
 for host in known_hosts:
 	if host != config.ip_without_mask:
 		try:
-			proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote.py", host, "vboxmanage list vms"], stdout=subprocess.PIPE, shell=True)
+			proc = subprocess.Popen([config.zvb_path + "remote.py", host, "vboxmanage --version"], stdout=subprocess.PIPE, shell=True)
+			(remote_vbox_version_tmp, err) = proc.communicate()
+			remote_vbox_version = []
+			remote_vbox_version = remote_vbox_version_tmp.split("\n")
+			
+			proc = subprocess.Popen([config.zvb_path + "remote.py", host, "vboxmanage list vms"], stdout=subprocess.PIPE, shell=True)
 			(remote_vms_tmp, err) = proc.communicate()
 			print remote_vms_tmp
 			remote_vms_t = []
-			#remote_vms = re.findall('\"([a-zA-Z0-9_])\"',remote_vms_tmp)
 			remote_vms_t = remote_vms_tmp.split("\n")
 			print remote_vms_t
-			# print type(remote_vms)
-			# print remote_vms
-			# print remote_vms[0]
 			remote_vms_t.pop(0)
 			remote_vms_t.pop(-1)
 			remote_vms_t.pop(-1)
@@ -109,16 +117,11 @@ for host in known_hosts:
 			for i in remote_vms_t:
 				remote_vms.append(i.split('"')[1])
 			print remote_vms
-			proc = subprocess.Popen(["C:\\Users\\admin\\Desktop\\projekt\\Projekt-grupowy\\remote.py", host, "vboxmanage --version"], stdout=subprocess.PIPE, shell=True)
-			(remote_vbox_version_tmp, err) = proc.communicate()
-			remote_vbox_version = []
-			remote_vbox_version = remote_vbox_version_tmp.split("\n")
-			#remote_vbox_version_tmp.pop(0)
-			#remote_vbox_version_tmp.pop(-1)
-			#remote_vbox_version_tmp.pop(-1)
+			
 			zvb.insert_vms(host, remote_vbox_version[1], remote_vms)
 		except IOError, error:
 			print error 
+			zvb.insert_vms(host, "", [])
 
 bottle.debug(True)
 bottle.run(host='localhost', port=8082)

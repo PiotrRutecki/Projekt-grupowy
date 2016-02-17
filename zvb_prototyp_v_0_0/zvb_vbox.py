@@ -20,19 +20,31 @@ def get_vbox_version():
 	return out
 	
 def start_vm(vmname):
-	subprocess.Popen([config.vboxmanage_path, "startvm", vmname], stdout=subprocess.PIPE, shell=True)
+	try:
+		subprocess.Popen([config.vboxmanage_path, "startvm", vmname], stdout=subprocess.PIPE, shell=True)
+	except IOError, error:
+		print error
+		return False
 	return True
 
 def delete_vm(vmname):
-	subprocess.Popen([config.vboxmanage_path, "unregistervm", vmname, "-delete"], stdout=subprocess.PIPE, shell=True)
+	try:
+		subprocess.Popen([config.vboxmanage_path, "unregistervm", vmname, "-delete"], stdout=subprocess.PIPE, shell=True)
+	except IOError, error:
+		print error
+		return False
 	return True
 
-def create_vm(vmname, vmtype):
-	out2 = []
-	proc = subprocess.Popen([config.vboxmanage_path, "createvm", "--name", vmname, "--ostype", vmtype], stdout=subprocess.PIPE, shell=True)
-	(out, err) = proc.communicate()
-	out2 = out.split('\n')[-2]
-	subprocess.Popen([config.vboxmanage_path, "registervm", out2.split("'")[1]], stdout=subprocess.PIPE, shell=True)
+def create_vm(host, vmname, vmtype):
+	try:
+		out2 = []
+		proc = subprocess.Popen([config.vboxmanage_path, "createvm", "--name", vmname, "--ostype", vmtype], stdout=subprocess.PIPE, shell=True)
+		(out, err) = proc.communicate()
+		out2 = out.split('\n')[-2]
+		subprocess.Popen([config.vboxmanage_path, "registervm", out2.split("'")[1]], stdout=subprocess.PIPE, shell=True)
+	except IOError, error:
+		print error
+		return False
 	return True
 def find_known_hosts():
 	known_hosts =[]
@@ -40,12 +52,6 @@ def find_known_hosts():
 	temp = []
 	proc = subprocess.Popen(["nmap", "--open", "-sn", config.ip], stdout=subprocess.PIPE, shell=True)
 	(out, err) = proc.communicate()
-	# tab = out.split('\n')
-	# search_string = "Nmap scan report for"
-	# for i in tab:
-		# if search_string in i:
-			# temp = i.split(" ")
-			# known_hosts.append(temp[-1])
 	known_hosts = re.findall('([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', out)
 	return known_hosts
 	
