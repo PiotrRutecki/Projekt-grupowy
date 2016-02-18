@@ -1,4 +1,3 @@
-#from vboxapi import VirtualBoxManager
 import subprocess
 import config
 import re

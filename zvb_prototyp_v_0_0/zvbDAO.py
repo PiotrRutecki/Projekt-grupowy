@@ -1,5 +1,3 @@
-__author__ = 'artur'
-
 #DATA ACCESS OBJECT
 
 class ZvbDAO:

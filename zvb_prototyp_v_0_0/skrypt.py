@@ -1,4 +1,3 @@
-# Message Receiver
 import os
 from socket import *
 import subprocess
@@ -18,18 +17,14 @@ def receiver():
 	print "Received message: " + data
 	komendy = []
 	komendy = data.split(' ')
-	print komendy
 	proc = subprocess.Popen(komendy,stdout=subprocess.PIPE, shell=True)
 	(out, err) = proc.communicate()
-	print out
 	global wynik
 	wynik = out
-	print wynik
 	UDPSock.close()
 	global flaga
 	flaga = 1
 
-# Message Sender
 def sender():
 	host = "192.168.0.3" # set to IP address of manage computer
 	port = 13000

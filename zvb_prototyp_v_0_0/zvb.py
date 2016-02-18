@@ -9,7 +9,6 @@ import config
 import subprocess
 import re
 
-__author__='artur'
 
 @bottle.route('/')
 def zvb_index():
@@ -41,7 +40,6 @@ def start_vm(host, vmname):
 
 @bottle.route('/delete_vm/<host>/<vmname>')
 def delete_vm(host, vmname):
-	#hostname = "local"
 	vmname = cgi.escape(vmname)
 	host = cgi.escape(host)
 	zvb_vbox.delete_vm(vmname)
@@ -61,7 +59,6 @@ def create_vm(host):
 	
 @bottle.post('/create_vm/<host>')
 def process_create_vm(host):
-	#hostname = "local"
 	host = cgi.escape(host)
 	vmname = bottle.request.forms.get("vmname")
 	vmtype = bottle.request.forms.get("vmtype")
@@ -104,15 +101,12 @@ for host in known_hosts:
 			
 			proc = subprocess.Popen([config.zvb_path + "remote.py", host, "vboxmanage list vms"], stdout=subprocess.PIPE, shell=True)
 			(remote_vms_tmp, err) = proc.communicate()
-			print remote_vms_tmp
 			remote_vms_t = []
 			remote_vms_t = remote_vms_tmp.split("\n")
-			print remote_vms_t
 			remote_vms_t.pop(0)
 			remote_vms_t.pop(-1)
 			remote_vms_t.pop(-1)
 			
-			print remote_vms_t
 			remote_vms = []
 			for i in remote_vms_t:
 				remote_vms.append(i.split('"')[1])
